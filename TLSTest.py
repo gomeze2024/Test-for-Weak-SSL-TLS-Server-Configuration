@@ -1,9 +1,19 @@
 from openssldata import get_ciphers, nmap_ciphers, openssl_ciphers
 from findcipher import cipher_strength
+from urllib.parse import urlparse
 
+def url_validator(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
+        
 def main():
     #get the URL, input validation inside the functions that run commands
     website_url = input("Enter the website URL (starting with http:// or https://): ")
+    if not url_validator(website_url):
+        raise ValueError("The provided URL is not valid.")
 
     print("--- Conducting TestSSL scan for " + website_url + " ---")
     ciphers = get_ciphers(website_url)
