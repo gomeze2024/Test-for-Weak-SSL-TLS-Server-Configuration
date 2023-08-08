@@ -1,6 +1,5 @@
 from openssldata import get_ciphers, nmap_ciphers, openssl_ciphers
 from findcipher import cipher_strength
-from urllib.parse import urlparse
         
 def main():
     #get the URL, input validation inside the functions that run commands
