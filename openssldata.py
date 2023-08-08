@@ -1,4 +1,5 @@
 import re
+import shlex
 import subprocess
 from urllib.parse import urlparse
 
@@ -13,10 +14,11 @@ def get_ciphers(website_url):
     if not validate_url(website_url):
         raise ValueError("Invalid website URL. Please provide a valid URL starting with http:// or https://")
     try:
-        command = ["testssl -U -E " + website_url]
+        command = shlex.split("testssl -U -E {}".format(website_url))
 
-        p1 = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p1 = subprocess.run(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         stdout_text = p1.stdout
+
         lines = stdout_text.split("\n")
 
         ciphers = []
@@ -69,8 +71,8 @@ def nmap_ciphers(website_url):
     website, port = get_website_and_port(website_url)
 
     try:
-        command = ["nmap -sT -p " + str(port) + " " + str(website)+" --script ssl-enum-ciphers "]
-        p1 = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        command = shlex.split("nmap -sT -p {} {} --script ssl-enum-ciphers".format(port, website))
+        p1 = subprocess.run(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         stdout_text = p1.stdout
 
         return stdout_text, command[0]
@@ -109,10 +111,12 @@ def openssl_ciphers(website_url, cipher):
     extracted_string = "-" + extracted_string.lower().replace(" ", "").replace(".", "_")
     
     try:
-        command = ["echo | openssl s_client -connect " + str(with_port) + " -servername " +
-                    str(without_port) + " " + extracted_string +" -cipher " + cipher['name']]
+        full_command = 'openssl s_client -connect {} -servername {} {} -cipher {}'.format(with_port, without_port, extracted_string, cipher['name'])
+        command = shlex.split(full_command)
         
-        p1 = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        print(full_command)
+
+        p1 = subprocess.run(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         stdout_text = p1.stdout
 
         pattern = r"(?<=CONNECTED\(00000005\))[\s\S]*?SSL handshake has read([\s\S]*)"
@@ -120,10 +124,11 @@ def openssl_ciphers(website_url, cipher):
 
         if match:
             extracted_data = "CONNECTED(00000005)\n---\n"+ match.group(1).strip()
+            print(extracted_data)
+            return extracted_data, command
+        
         else:
             print("Could not establish connection")
-
-        return extracted_data, command[0]
     
     
     except subprocess.CalledProcessError as e:
@@ -131,11 +136,5 @@ def openssl_ciphers(website_url, cipher):
     except Exception as e:
         print("An error occurred:")
         print(e)
-    
-if __name__ == "__main__":
-    we = {'tls_version': '\x1b[4mTLS 1\x1b[m', 'name': 'ECDHE-RSA-AES256-SHA', 'openssl_name': 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'strength': 'Weak'}
-    wah,woh = openssl_ciphers("https://localhost:8000/", we)
-    print(wah)
-    print(woh)
 
 
