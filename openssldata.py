@@ -20,6 +20,7 @@ def get_ciphers(website_url):
         if system == "Linux":
             command = shlex.split("testssl -U -E {}".format(website_url))
         else: 
+
             command = shlex.split("testssl.sh -U -E {}".format(website_url))
 
         p1 = subprocess.run(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -81,9 +82,6 @@ def nmap_ciphers(website_url):
         command = shlex.split(full_command)
         p1 = subprocess.run(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         stdout_text = p1.stdout
-
-        print(full_command)
-        print(stdout_text)
         
         return stdout_text, full_command
     
@@ -130,7 +128,6 @@ def openssl_ciphers(website_url, cipher):
     try:
         full_command = 'openssl s_client -connect {} -servername {} {} -cipher {}'.format(with_port, without_port, extracted_string, cipher['name'])
         command = shlex.split(full_command)
-        print(full_command)
         p1 = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
 
         p1.stdin.write("Q\n")
@@ -142,7 +139,6 @@ def openssl_ciphers(website_url, cipher):
 
         if match:
             extracted_data = "CONNECTED(00000005)\n---\n"+ match.group(1).strip()
-            print(extracted_data)
             return extracted_data, full_command
         
         else:
