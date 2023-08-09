@@ -13,5 +13,6 @@ tls_cipher_suites = (
 httpd.socket = ssl.wrap_socket(httpd.socket, server_side=True,
                                certfile="server.pem",
                                keyfile="key.pem",
+                               ssl_version=ssl.PROTOCOL_TLS,
                                ciphers=":".join(tls_cipher_suites))
 httpd.serve_forever()
