@@ -12,13 +12,13 @@ The script outputs the weak/ insecure ciphers along with the supporting evidence
 ```shell
 pip install -r requirements.txt
 ```
-3. Optional: For a website to test the script on: 
-    1. Generate key and cert files:
+3. Optional: For a website to test the script on:<br/>
+    i. Generate key and cert files:
     ```shell
     openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
     ```         
-    More info here: https://www.suse.com/support/kb/doc/?id=000018152
-    2. Run the insecure or secure website.
+    More info here: https://www.suse.com/support/kb/doc/?id=000018152<br/>
+    ii. Run the insecure or secure website.
     ```shell
     python insecure_https_server.py 
     #OR
